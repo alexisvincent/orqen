@@ -1,0 +1,7 @@
+{
+  "name": "@orqen/mia",
+  "private": true,
+  "dependencies": {
+    "@orqen/sandbox": "workspace:*"
+  }
+}

@@ -1,0 +1,31 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .: {}
+
+  examples/mia:
+    dependencies:
+      '@orqen/sandbox':
+        specifier: workspace:*
+        version: link:../../packages/sandbox
+
+  packages/sandbox:
+    dependencies:
+      '@fly/sprites':
+        specifier: ^0.0.1
+        version: 0.0.1
+
+packages:
+
+  '@fly/sprites@0.0.1':
+    resolution: {integrity: sha512-1s+dIVi/pTMP4Aj4Mkg+4LoZ/+a0Kp6l9piPRxvpgEKm11b/eRiZgJwVytwAHeI/vtg2fuwcFExjtXOEfny/TA==}
+    engines: {node: '>=24.0.0'}
+
+snapshots:
+
+  '@fly/sprites@0.0.1': {}
