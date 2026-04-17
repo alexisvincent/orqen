@@ -1,17 +1,19 @@
 {
-  "name": "@orqen/docker-mcp",
+  "name": "@orqen/mcp-server",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch --env-file-if-exists=.env src/index.ts"
   },
   "dependencies": {
     "@cfworker/json-schema": "^4.1.1",
+    "@fly/sprites": "^0.0.1",
     "@hono/node-server": "^1.19.14",
     "@modelcontextprotocol/server": "2.0.0-alpha.2",
     "@orqen/sandbox-use": "workspace:*",
     "@orqen/sandbox-use-just-bash": "workspace:^",
     "@orqen/sandbox-use-mcp-server": "workspace:*",
+    "@orqen/sandbox-use-sprites": "workspace:^",
     "hono": "^4.12.14",
     "just-bash": "^2.14.2"
   },

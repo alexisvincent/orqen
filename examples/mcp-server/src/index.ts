@@ -1,17 +1,30 @@
 import { serve } from "@hono/node-server";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/server";
 import { createSandboxMcpServer } from "@orqen/sandbox-use-mcp-server";
-import { routingSandbox } from "@orqen/sandbox-use";
+import { routingSandbox, type Sandbox } from "@orqen/sandbox-use";
 import { justBashSandbox } from "@orqen/sandbox-use-just-bash";
+import { spritesSandbox } from "@orqen/sandbox-use-sprites";
+import { SpritesClient } from "@fly/sprites";
 import { Bash } from "just-bash";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
-const sandbox = routingSandbox({
-  environments: {
-    bash: justBashSandbox(() => new Bash()),
-  },
-});
+const environments: Record<string, Sandbox> = {
+  bash: justBashSandbox(() => new Bash()),
+};
+
+const spriteApiToken = process.env.SPRITE_API_TOKEN;
+if (spriteApiToken) {
+  const client = new SpritesClient(spriteApiToken, {
+    baseURL: process.env.SPRITE_API_URL,
+  });
+  environments.sprite = spritesSandbox({ client });
+  console.log("sprite environment enabled");
+} else {
+  console.log("SPRITE_API_TOKEN not set — sprite environment disabled");
+}
+
+const sandbox = routingSandbox({ environments });
 
 const server = createSandboxMcpServer(sandbox);
 const transport = new WebStandardStreamableHTTPServerTransport();

@@ -6,3 +6,6 @@ dist
 .vscode
 .claude
 *.log
+.env
+.env.local
+

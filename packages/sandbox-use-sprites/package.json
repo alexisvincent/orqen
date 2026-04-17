@@ -21,10 +21,13 @@
     }
   },
   "dependencies": {
-    "@fly/sprites": "^0.0.1",
     "@orqen/sandbox-use": "workspace:*"
   },
+  "peerDependencies": {
+    "@fly/sprites": "^0"
+  },
   "devDependencies": {
+    "@fly/sprites": "^0.0.1",
     "@types/node": "^25.6.0",
     "typescript": "^6.0.3"
   }
