@@ -1,20 +1,25 @@
 import { z } from "zod";
 
-export const ExecInput = z.object({
-  cmd: z.string(),
-  args: z.array(z.string()).optional(),
-});
+export const toolSpecs = {
+  exec: {
+    title: "exec",
+    description: "exec",
+    inputSchema: z.object({
+      cmd: z.string(),
+      args: z.array(z.string()).optional(),
+    }),
+    outputSchema: z.object({
+      stdout: z.string(),
+      stderr: z.string(),
+      exitCode: z.number(),
+    }),
+  },
+} as const;
 
-export const ExecOutput = z.object({
-  stdout: z.string(),
-  stderr: z.string(),
-  exitCode: z.number(),
-});
-
-export const ExecTitle = "exec"
-export const ExecDescription = "exec"
+export type ToolSpecs = typeof toolSpecs;
 
 export type Sandbox = {
-  exec: (input: z.infer<typeof ExecInput>) => Promise<z.infer<typeof ExecOutput>>;
+  [K in keyof ToolSpecs]: (
+    input: z.infer<ToolSpecs[K]["inputSchema"]>,
+  ) => Promise<z.infer<ToolSpecs[K]["outputSchema"]>>;
 };
-
