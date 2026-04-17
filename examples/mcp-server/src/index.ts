@@ -1,16 +1,22 @@
 import { serve } from "@hono/node-server";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/server";
 import { createSandboxMcpServer } from "@orqen/sandbox-use-mcp-server";
-import { routingSandbox, type Sandbox } from "@orqen/sandbox-use";
-import { justBashSandbox } from "@orqen/sandbox-use-just-bash";
-import { spritesSandbox } from "@orqen/sandbox-use-sprites";
+import {
+  SandboxService,
+  routingSandboxManager,
+  type SandboxManager,
+} from "@orqen/sandbox-use";
+import { justBashSandboxManager } from "@orqen/sandbox-use-just-bash";
+import { spritesSandboxManager } from "@orqen/sandbox-use-sprites";
+import { dockerSandboxManager } from "@orqen/sandbox-use-docker";
 import { SpritesClient } from "@fly/sprites";
+import { DockerClient } from "@docker/node-sdk";
 import { Bash } from "just-bash";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
-const environments: Record<string, Sandbox> = {
-  bash: justBashSandbox(() => new Bash()),
+const environments: Record<string, SandboxManager> = {
+  bash: justBashSandboxManager(() => new Bash()),
 };
 
 const spriteApiToken = process.env.SPRITE_API_TOKEN;
@@ -18,13 +24,37 @@ if (spriteApiToken) {
   const client = new SpritesClient(spriteApiToken, {
     baseURL: process.env.SPRITE_API_URL,
   });
-  environments.sprite = spritesSandbox({ client });
+  environments.sprite = spritesSandboxManager({ client });
   console.log("sprite environment enabled");
 } else {
   console.log("SPRITE_API_TOKEN not set — sprite environment disabled");
 }
 
-const sandbox = routingSandbox({ environments });
+try {
+  const docker = await DockerClient.fromDockerConfig();
+  const dockerImage = process.env.DOCKER_IMAGE ?? "alpine:latest";
+  environments.docker = dockerSandboxManager({
+    docker,
+    createContainer: async () => {
+      await docker.imageCreate({ fromImage: dockerImage }).wait();
+      const { Id } = await docker.containerCreate({
+        Image: dockerImage,
+        Cmd: ["sleep", "infinity"],
+        Tty: false,
+      });
+      await docker.containerStart(Id);
+      return Id;
+    },
+  });
+  console.log(`docker environment enabled (${dockerImage})`);
+} catch (err) {
+  console.log(
+    `docker environment disabled: ${err instanceof Error ? err.message : err}`,
+  );
+}
+
+const manager = routingSandboxManager({ environments });
+const sandbox = new SandboxService(manager);
 
 const server = createSandboxMcpServer(sandbox);
 const transport = new WebStandardStreamableHTTPServerTransport();

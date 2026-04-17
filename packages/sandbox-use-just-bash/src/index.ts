@@ -1,37 +1,38 @@
 import type { Bash } from "just-bash";
-import type { Sandbox } from "@orqen/sandbox-use";
+import type { Sandbox, SandboxManager } from "@orqen/sandbox-use";
 
-const quoteArg = (s: string) => `'${s.replace(/'/g, "'\\''")}'`;
+export const justBashSandbox = (bash: Bash): Sandbox => ({
+  executeCommand: async (command) => {
+    const { stdout, stderr, exitCode } = await bash.exec(command);
+    return { stdout, stderr, exitCode };
+  },
+  readFile: (path) => bash.readFile(path),
+  writeFiles: async (files) => {
+    for (const { path, content } of files) {
+      await bash.writeFile(path, content);
+    }
+  },
+});
 
 export type BashFactory = (environment: string) => Bash;
 
-export const justBashSandbox = (factory: BashFactory): Sandbox => {
-  const sandboxes = new Map<string, { bash: Bash; environment: string }>();
+export const justBashSandboxManager = (
+  factory: BashFactory,
+): SandboxManager => {
+  const sandboxes = new Map<string, Sandbox>();
 
   return {
-    create: async ({ description, environment }) => {
+    create: async ({ environment }) => {
       const id = crypto.randomUUID();
-      sandboxes.set(id, { bash: factory(environment), environment });
-      return {
-        id,
-        environment,
-        description,
-      };
+      sandboxes.set(id, justBashSandbox(factory(environment)));
+      return id;
     },
-    exec: async ({ sandboxId, cmd, args = [] }) => {
-      const sandbox = sandboxes.get(sandboxId);
+    get: async (id) => {
+      const sandbox = sandboxes.get(id);
       if (!sandbox) {
-        return {
-          stdout: "",
-          stderr: `no sandbox with id ${sandboxId}`,
-          exitCode: 1,
-        };
+        throw new Error(`no sandbox with id ${id}`);
       }
-      const line = args.length
-        ? `${cmd} ${args.map(quoteArg).join(" ")}`
-        : cmd;
-      const { stdout, stderr, exitCode } = await sandbox.bash.exec(line);
-      return { stdout, stderr, exitCode };
+      return sandbox;
     },
   };
 };

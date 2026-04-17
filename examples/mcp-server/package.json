@@ -7,10 +7,12 @@
   },
   "dependencies": {
     "@cfworker/json-schema": "^4.1.1",
-    "@fly/sprites": "^0.0.1",
+    "@docker/node-sdk": "^0.0.17",
+    "@fly/sprites": "0.0.1-dev.408",
     "@hono/node-server": "^1.19.14",
     "@modelcontextprotocol/server": "2.0.0-alpha.2",
     "@orqen/sandbox-use": "workspace:*",
+    "@orqen/sandbox-use-docker": "workspace:^",
     "@orqen/sandbox-use-just-bash": "workspace:^",
     "@orqen/sandbox-use-mcp-server": "workspace:*",
     "@orqen/sandbox-use-sprites": "workspace:^",

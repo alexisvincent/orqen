@@ -1,14 +1,12 @@
 {
-  "name": "@orqen/sandbox-use-sprites",
+  "name": "@orqen/sandbox-use-docker",
   "version": "0.0.0",
   "license": "MIT",
   "type": "module",
   "exports": {
     ".": "./src/index.ts"
   },
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
@@ -23,14 +21,16 @@
     }
   },
   "dependencies": {
-    "@orqen/sandbox-use": "workspace:*"
+    "@orqen/sandbox-use": "workspace:*",
+    "tar-stream": "^3.1.7"
   },
   "peerDependencies": {
-    "@fly/sprites": "^0"
+    "@docker/node-sdk": "^0"
   },
   "devDependencies": {
-    "@fly/sprites": "0.0.1-dev.408",
+    "@docker/node-sdk": "^0.0.17",
     "@types/node": "^25.6.0",
+    "@types/tar-stream": "^3.1.4",
     "typescript": "^6.0.3"
   }
 }
