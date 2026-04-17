@@ -1,0 +1,7 @@
+{
+  "name": "@orqen/docker-mcp",
+  "private": true,
+  "dependencies": {
+    "@orqen/sandbox-use": "workspace:*"
+  }
+}
