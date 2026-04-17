@@ -1,14 +1,15 @@
 import { tool } from "ai";
 import { toolSpecs, type Sandbox } from "@orqen/sandbox-use";
 
-export const sandboxTools = (sandbox: Sandbox) =>
-  Object.fromEntries(
-    Object.entries(toolSpecs).map(([name, spec]) => [
-      name,
-      tool({
-        description: spec.description,
-        inputSchema: spec.inputSchema,
-        execute: (input) => (sandbox as any)[name](input),
-      }),
-    ]),
-  );
+export const sandboxTools = (sandbox: Sandbox) => ({
+  create: tool({
+    description: toolSpecs.create.description,
+    inputSchema: toolSpecs.create.inputSchema,
+    execute: (input) => sandbox.create(input),
+  }),
+  exec: tool({
+    description: toolSpecs.exec.description,
+    inputSchema: toolSpecs.exec.inputSchema,
+    execute: (input) => sandbox.exec(input),
+  }),
+});

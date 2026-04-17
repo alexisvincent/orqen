@@ -1,17 +1,17 @@
 import { serve } from "@hono/node-server";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/server";
 import { createSandboxMcpServer } from "@orqen/sandbox-use-mcp-server";
-import type { Sandbox } from "@orqen/sandbox-use";
+import { routingSandbox } from "@orqen/sandbox-use";
+import { justBashSandbox } from "@orqen/sandbox-use-just-bash";
+import { Bash } from "just-bash";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
-const sandbox: Sandbox = {
-  exec: async ({ cmd, args = [] }) => ({
-    stdout: `ran: ${cmd} ${args.join(" ")}`.trim(),
-    stderr: "",
-    exitCode: 0,
-  }),
-};
+const sandbox = routingSandbox({
+  environments: {
+    bash: justBashSandbox(() => new Bash()),
+  },
+});
 
 const server = createSandboxMcpServer(sandbox);
 const transport = new WebStandardStreamableHTTPServerTransport();
