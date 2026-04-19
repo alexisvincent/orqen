@@ -15,7 +15,7 @@ export const spritesSandbox = (sprite: Sprite): Sandbox => {
         exitCode: result.exitCode,
       };
     },
-    readFile: (path) => fs.readFile(path, "utf8"),
+    readFile: (path) => fs.readFile(path),
     writeFiles: async (files) => {
       await Promise.all(
         files.map(async ({ path, content }) => {

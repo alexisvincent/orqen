@@ -46,16 +46,16 @@ export const dockerSandbox = (
     await docker.containerArchive(containerId, path, writableStream);
     const tarBuffer = Buffer.concat(chunks);
 
-    return new Promise<string>((resolve, reject) => {
+    return new Promise<Buffer>((resolve, reject) => {
       const extractor = extract();
-      let content = "";
+      let content = Buffer.alloc(0);
       extractor.on(
         "entry",
         (_header: Headers, stream: Readable, next: () => void) => {
           const fileChunks: Buffer[] = [];
           stream.on("data", (chunk: Buffer) => fileChunks.push(chunk));
           stream.on("end", () => {
-            content = Buffer.concat(fileChunks).toString("utf-8");
+            content = Buffer.concat(fileChunks);
             next();
           });
           stream.resume();
@@ -71,7 +71,7 @@ export const dockerSandbox = (
   writeFiles: async (files) => {
     for (const { path, content } of files) {
       const dir = path.substring(0, path.lastIndexOf("/")) || "/";
-      const b64 = Buffer.from(content, "utf8").toString("base64");
+      const b64 = content.toString("base64");
 
       const { Id: execId } = await docker.containerExec(containerId, {
         Cmd: [

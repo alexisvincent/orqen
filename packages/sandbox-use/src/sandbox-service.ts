@@ -2,6 +2,18 @@ import { z } from "zod";
 import type { CommandResult } from "./sandbox";
 import type { SandboxManager } from "./sandbox-manager";
 
+function bufferToContent(buf: Buffer): { content: string; encoding: "utf8" | "base64" } {
+  if (buf.includes(0)) {
+    return { content: buf.toString("base64"), encoding: "base64" };
+  }
+  try {
+    const content = new TextDecoder("utf-8", { fatal: true }).decode(buf);
+    return { content, encoding: "utf8" };
+  } catch {
+    return { content: buf.toString("base64"), encoding: "base64" };
+  }
+}
+
 export const toolSpecs = {
   create: {
     title: "create",
@@ -42,6 +54,7 @@ export const toolSpecs = {
     }),
     outputSchema: z.object({
       content: z.string(),
+      encoding: z.enum(["utf8", "base64"]),
     }),
   },
   writeFiles: {
@@ -83,9 +96,9 @@ export class SandboxService {
     return sandbox.executeCommand(command);
   }
 
-  async readFile(id: string, path: string): Promise<string> {
+  async readFile(id: string, path: string): Promise<{ content: string; encoding: "utf8" | "base64" }> {
     const sandbox = await this.manager.get(id);
-    return sandbox.readFile(path);
+    return bufferToContent(await sandbox.readFile(path));
   }
 
   async writeFiles(
@@ -93,6 +106,8 @@ export class SandboxService {
     files: Array<{ path: string; content: string }>,
   ): Promise<void> {
     const sandbox = await this.manager.get(id);
-    return sandbox.writeFiles(files);
+    return sandbox.writeFiles(
+      files.map(({ path, content }) => ({ path, content: Buffer.from(content, "utf8") })),
+    );
   }
 }

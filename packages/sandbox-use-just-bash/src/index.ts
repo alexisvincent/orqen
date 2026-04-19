@@ -6,10 +6,18 @@ export const justBashSandbox = (bash: Bash): Sandbox => ({
     const { stdout, stderr, exitCode } = await bash.exec(command);
     return { stdout, stderr, exitCode };
   },
-  readFile: (path) => bash.readFile(path),
+  readFile: async (path) => {
+    const { stdout } = await bash.exec(`base64 < "${path}"`);
+    return Buffer.from(stdout.trim(), "base64");
+  },
   writeFiles: async (files) => {
     for (const { path, content } of files) {
-      await bash.writeFile(path, content);
+      const dir = path.substring(0, path.lastIndexOf("/")) || ".";
+      const b64 = content.toString("base64");
+      const { exitCode, stderr } = await bash.exec(
+        `mkdir -p "${dir}" && echo "${b64}" | base64 -d > "${path}"`,
+      );
+      if (exitCode !== 0) throw new Error(`writeFile failed for ${path}: ${stderr}`);
     }
   },
 });
